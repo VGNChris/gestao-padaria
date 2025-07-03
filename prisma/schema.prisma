@@ -1,0 +1,64 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Pao {
+  id                 Int      @id @default(autoincrement())
+  nome               String
+  unidadesPorPacote  Int
+  valorPacote        Float
+  ativo              Boolean  @default(true)
+  itensEncomenda     ItemEncomenda[]
+}
+
+model Cliente {
+  id                 Int      @id @default(autoincrement())
+  nome               String
+  telefone           String
+  encomendas         Encomenda[]
+}
+
+model Encomenda {
+  id                 Int      @id @default(autoincrement())
+  clienteId          Int
+  cliente            Cliente  @relation(fields: [clienteId], references: [id])
+  itensEncomenda     ItemEncomenda[]
+  valorTotal         Float
+  dataEncomenda      DateTime @default(now())
+  dataEntrega        DateTime
+  statusProducao     StatusProducao @default(PENDENTE)
+  statusPagamento    StatusPagamento @default(PENDENTE)
+}
+
+model ItemEncomenda {
+  id                 Int      @id @default(autoincrement())
+  encomendaId        Int
+  encomenda          Encomenda @relation(fields: [encomendaId], references: [id])
+  paoId              Int
+  pao                Pao      @relation(fields: [paoId], references: [id])
+  quantidadePacotes  Int
+}
+
+enum StatusProducao {
+  PENDENTE
+  EM_PRODUCAO
+  PRONTO_PARA_ENTREGA
+  ENTREGUE
+  CANCELADA
+}
+
+enum StatusPagamento {
+  PENDENTE
+  PAGO
+}
