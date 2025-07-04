@@ -66,19 +66,51 @@ function Paes() {
   const handleFormSubmit = async (data) => {
     try {
       console.log('🔄 Salvando pão:', data);
-      if (editData) {
-        await api.put(`/api/paes/${editData.id}`, data);
-        console.log('✅ Pão editado com sucesso');
-      } else {
-        await api.post('/api/paes', data);
-        console.log('✅ Pão criado com sucesso');
+      console.log('🔐 Verificando autenticação...');
+      
+      // Verificar se há autenticação
+      const auth = localStorage.getItem('padariaAuth');
+      if (!auth) {
+        showError('Erro: Usuário não autenticado. Faça login novamente.');
+        return;
       }
+      
+      if (editData) {
+        console.log('✏️ Editando pão existente...');
+        const response = await api.put(`/api/paes/${editData.id}`, data);
+        console.log('✅ Pão editado com sucesso:', response.data);
+      } else {
+        console.log('➕ Criando novo pão...');
+        const response = await api.post('/api/paes', data);
+        console.log('✅ Pão criado com sucesso:', response.data);
+      }
+      
       buscarPaes();
       handleFormClose();
     } catch (err) {
       console.error('❌ Erro ao salvar pão:', err);
-      const errorMessage = err.response?.data?.error || err.message || 'Erro ao salvar pão';
-      showError(`Erro ao salvar pão: ${errorMessage}`);
+      console.error('Detalhes do erro:', {
+        status: err.response?.status,
+        statusText: err.response?.statusText,
+        data: err.response?.data,
+        message: err.message
+      });
+      
+      let errorMessage = 'Erro ao salvar pão';
+      
+      if (err.response?.status === 401) {
+        errorMessage = 'Erro de autenticação. Faça login novamente.';
+      } else if (err.response?.status === 400) {
+        errorMessage = `Erro de validação: ${err.response.data?.error || 'Dados inválidos'}`;
+      } else if (err.response?.status === 500) {
+        errorMessage = `Erro do servidor: ${err.response.data?.details || 'Erro interno'}`;
+      } else if (err.message.includes('Network Error')) {
+        errorMessage = 'Erro de conexão. Verifique sua internet.';
+      } else if (err.response?.data?.error) {
+        errorMessage = err.response.data.error;
+      }
+      
+      showError(errorMessage);
     }
   };
 

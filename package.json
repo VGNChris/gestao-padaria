@@ -12,6 +12,7 @@
     "db:push": "prisma db push",
     "test:db": "node test-connection.js",
     "test:date": "node test-date-filter.js",
+    "test:create": "node test-create-operations.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
