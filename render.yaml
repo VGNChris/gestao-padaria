@@ -1,0 +1,14 @@
+services:
+  - type: web
+    name: gestao-padaria-api
+    env: node
+    plan: free
+    buildCommand: npm install && npm run build && npm run db:migrate:safe
+    startCommand: npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: DATABASE_URL
+        sync: false
+    healthCheckPath: /health
+    autoDeploy: true 

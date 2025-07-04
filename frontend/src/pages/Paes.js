@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Container, Typography, Button, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Switch, CircularProgress } from '@mui/material';
+import { Container, Typography, Button, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Switch, CircularProgress, Alert, Snackbar } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
 import api from '../services/api';
 import PaoForm from '../components/PaoForm';
@@ -9,28 +9,42 @@ function Paes() {
   const [loading, setLoading] = useState(true);
   const [formOpen, setFormOpen] = useState(false);
   const [editData, setEditData] = useState(null);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
     buscarPaes();
   }, []);
 
+  const showError = (message) => {
+    setError(message);
+    setTimeout(() => setError(null), 5000);
+  };
+
   const buscarPaes = async () => {
     setLoading(true);
     try {
+      console.log('🔄 Buscando pães...');
       const res = await api.get('/paes');
+      console.log('✅ Pães carregados:', res.data.length);
       setPaes(res.data);
     } catch (err) {
-      alert('Erro ao buscar pães');
+      console.error('❌ Erro ao buscar pães:', err);
+      const errorMessage = err.response?.data?.error || err.message || 'Erro ao buscar pães';
+      showError(`Erro ao buscar pães: ${errorMessage}`);
     }
     setLoading(false);
   };
 
   const handleToggleAtivo = async (id, ativo) => {
     try {
+      console.log('🔄 Alterando status do pão:', id, 'para:', !ativo);
       await api.patch(`/paes/${id}/status`, { ativo: !ativo });
+      console.log('✅ Status alterado com sucesso');
       buscarPaes();
     } catch (err) {
-      alert('Erro ao alterar status');
+      console.error('❌ Erro ao alterar status:', err);
+      const errorMessage = err.response?.data?.error || err.message || 'Erro ao alterar status';
+      showError(`Erro ao alterar status: ${errorMessage}`);
     }
   };
 
@@ -51,25 +65,34 @@ function Paes() {
 
   const handleFormSubmit = async (data) => {
     try {
+      console.log('🔄 Salvando pão:', data);
       if (editData) {
         await api.put(`/paes/${editData.id}`, data);
+        console.log('✅ Pão editado com sucesso');
       } else {
         await api.post('/paes', data);
+        console.log('✅ Pão criado com sucesso');
       }
       buscarPaes();
       handleFormClose();
     } catch (err) {
-      alert('Erro ao salvar pão');
+      console.error('❌ Erro ao salvar pão:', err);
+      const errorMessage = err.response?.data?.error || err.message || 'Erro ao salvar pão';
+      showError(`Erro ao salvar pão: ${errorMessage}`);
     }
   };
 
   const handleDelete = async (id) => {
     if (!window.confirm('Tem certeza que deseja apagar este pão?')) return;
     try {
+      console.log('🔄 Deletando pão:', id);
       await api.delete(`/paes/${id}`);
+      console.log('✅ Pão deletado com sucesso');
       buscarPaes();
     } catch (err) {
-      alert('Erro ao apagar pão');
+      console.error('❌ Erro ao apagar pão:', err);
+      const errorMessage = err.response?.data?.error || err.message || 'Erro ao apagar pão';
+      showError(`Erro ao apagar pão: ${errorMessage}`);
     }
   };
 
@@ -77,6 +100,7 @@ function Paes() {
     <Container maxWidth="md" sx={{ mt: 4 }}>
       <Typography variant="h4" gutterBottom>Gestão de Pães</Typography>
       <Button variant="contained" startIcon={<AddIcon />} sx={{ mb: 2 }} onClick={handleAdd}>Adicionar Novo Pão</Button>
+      
       {loading ? <CircularProgress /> : (
         <TableContainer component={Paper}>
           <Table>
@@ -113,7 +137,14 @@ function Paes() {
           </Table>
         </TableContainer>
       )}
+      
       <PaoForm open={formOpen} onClose={handleFormClose} onSubmit={handleFormSubmit} initialData={editData} />
+      
+      <Snackbar open={!!error} autoHideDuration={5000} onClose={() => setError(null)}>
+        <Alert onClose={() => setError(null)} severity="error" sx={{ width: '100%' }}>
+          {error}
+        </Alert>
+      </Snackbar>
     </Container>
   );
 }
