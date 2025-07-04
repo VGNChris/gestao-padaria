@@ -31,7 +31,7 @@ function Encomendas() {
   const buscarEncomendas = async () => {
     setLoading(true);
     try {
-      const res = await api.get('/encomendas', {
+      const res = await api.get('/api/encomendas', {
         params: {
           statusProducao: filtroStatusProducao,
           statusPagamento: filtroStatusPagamento,

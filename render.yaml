@@ -3,7 +3,7 @@ services:
     name: gestao-padaria-api
     env: node
     plan: free
-    buildCommand: npm install && npm run build && npm run db:migrate:safe
+    buildCommand: chmod +x render-build.sh && ./render-build.sh
     startCommand: npm start
     envVars:
       - key: NODE_ENV
@@ -11,4 +11,11 @@ services:
       - key: DATABASE_URL
         sync: false
     healthCheckPath: /health
-    autoDeploy: true 
+    autoDeploy: true
+    buildFilter:
+      paths:
+        - package.json
+        - package-lock.json
+        - src/**
+        - prisma/**
+        - render.yaml 

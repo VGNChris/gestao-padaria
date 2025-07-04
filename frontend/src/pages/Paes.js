@@ -24,7 +24,7 @@ function Paes() {
     setLoading(true);
     try {
       console.log('🔄 Buscando pães...');
-      const res = await api.get('/paes');
+      const res = await api.get('/api/paes');
       console.log('✅ Pães carregados:', res.data.length);
       setPaes(res.data);
     } catch (err) {
@@ -38,7 +38,7 @@ function Paes() {
   const handleToggleAtivo = async (id, ativo) => {
     try {
       console.log('🔄 Alterando status do pão:', id, 'para:', !ativo);
-      await api.patch(`/paes/${id}/status`, { ativo: !ativo });
+      await api.patch(`/api/paes/${id}/status`, { ativo: !ativo });
       console.log('✅ Status alterado com sucesso');
       buscarPaes();
     } catch (err) {
@@ -67,10 +67,10 @@ function Paes() {
     try {
       console.log('🔄 Salvando pão:', data);
       if (editData) {
-        await api.put(`/paes/${editData.id}`, data);
+        await api.put(`/api/paes/${editData.id}`, data);
         console.log('✅ Pão editado com sucesso');
       } else {
-        await api.post('/paes', data);
+        await api.post('/api/paes', data);
         console.log('✅ Pão criado com sucesso');
       }
       buscarPaes();
@@ -86,7 +86,7 @@ function Paes() {
     if (!window.confirm('Tem certeza que deseja apagar este pão?')) return;
     try {
       console.log('🔄 Deletando pão:', id);
-      await api.delete(`/paes/${id}`);
+      await api.delete(`/api/paes/${id}`);
       console.log('✅ Pão deletado com sucesso');
       buscarPaes();
     } catch (err) {

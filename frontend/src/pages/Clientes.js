@@ -17,7 +17,7 @@ function Clientes() {
   const buscarClientes = async () => {
     setLoading(true);
     try {
-      const res = await api.get('/clientes');
+      const res = await api.get('/api/clientes');
       setClientes(res.data);
     } catch (err) {
       alert('Erro ao buscar clientes');

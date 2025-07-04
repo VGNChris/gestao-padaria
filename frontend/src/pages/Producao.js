@@ -10,7 +10,7 @@ function Producao() {
   const buscarProducao = async () => {
     setLoading(true);
     try {
-      const res = await api.get('/producao', { params: { data } });
+      const res = await api.get('/api/producao', { params: { data } });
       setProducao(res.data);
     } catch (err) {
       alert('Erro ao buscar produção');

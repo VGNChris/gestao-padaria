@@ -30,17 +30,17 @@ function Dashboard() {
       const inicioMes = new Date(hoje.getFullYear(), hoje.getMonth(), 1);
       const fimMes = new Date(hoje.getFullYear(), hoje.getMonth() + 1, 0);
       // Encomendas para hoje (dataEntrega)
-      const encomendasHojeRes = await api.get('/encomendas', { params: { dataEntrega: hojeStr } });
+      const encomendasHojeRes = await api.get('/api/encomendas', { params: { dataEntrega: hojeStr } });
       // Faturamento do dia (dataEntrega = dataFaturamento)
-      const encomendasDiaRes = await api.get('/encomendas', { params: { dataEntrega: dataFaturamento } });
+      const encomendasDiaRes = await api.get('/api/encomendas', { params: { dataEntrega: dataFaturamento } });
       const faturamentoDia = encomendasDiaRes.data.reduce((sum, e) => sum + e.valorTotal, 0);
       // Faturamento do mês
-      const relatorioMesRes = await api.get('/relatorios', { params: { inicio: inicioMes.toISOString().slice(0,10), fim: fimMes.toISOString().slice(0,10) } });
+      const relatorioMesRes = await api.get('/api/relatorios', { params: { inicio: inicioMes.toISOString().slice(0,10), fim: fimMes.toISOString().slice(0,10) } });
       // Pão mais vendido
       const paoMaisVendido = relatorioMesRes.data.maisVendidosQtd?.[0]?.[0] || '-';
       // Próximas entregas (7 dias)
       const fimSemana = new Date(hoje); fimSemana.setDate(hoje.getDate() + 7);
-      const encomendasSemanaRes = await api.get('/encomendas', { params: { dataEntregaDe: hojeStr, dataEntregaAte: fimSemana.toISOString().slice(0,10) } });
+      const encomendasSemanaRes = await api.get('/api/encomendas', { params: { dataEntregaDe: hojeStr, dataEntregaAte: fimSemana.toISOString().slice(0,10) } });
       setDashboard({
         encomendasHoje: encomendasHojeRes.data.length,
         faturamentoDia,
@@ -55,7 +55,7 @@ function Dashboard() {
   useEffect(() => {
     async function fetchProducao() {
       if (!dataProducao) return setProducao([]);
-      const res = await api.get('/producao', { params: { data: dataProducao } });
+      const res = await api.get('/api/producao', { params: { data: dataProducao } });
       setProducao(res.data);
     }
     fetchProducao();
