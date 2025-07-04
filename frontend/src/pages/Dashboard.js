@@ -29,11 +29,19 @@ function Dashboard() {
       const hojeStr = hoje.toISOString().slice(0,10);
       const inicioMes = new Date(hoje.getFullYear(), hoje.getMonth(), 1);
       const fimMes = new Date(hoje.getFullYear(), hoje.getMonth() + 1, 0);
+      
+      console.log('📅 Buscando encomendas para hoje:', hojeStr);
+      console.log('📅 Data de faturamento:', dataFaturamento);
+      
       // Encomendas para hoje (dataEntrega)
       const encomendasHojeRes = await api.get('/api/encomendas', { params: { dataEntrega: hojeStr } });
+      console.log('✅ Encomendas para hoje:', encomendasHojeRes.data.length);
+      
       // Faturamento do dia (dataEntrega = dataFaturamento)
       const encomendasDiaRes = await api.get('/api/encomendas', { params: { dataEntrega: dataFaturamento } });
       const faturamentoDia = encomendasDiaRes.data.reduce((sum, e) => sum + e.valorTotal, 0);
+      console.log('💰 Faturamento do dia:', faturamentoDia);
+      
       // Faturamento do mês
       const relatorioMesRes = await api.get('/api/relatorios', { params: { inicio: inicioMes.toISOString().slice(0,10), fim: fimMes.toISOString().slice(0,10) } });
       // Pão mais vendido
@@ -41,6 +49,7 @@ function Dashboard() {
       // Próximas entregas (7 dias)
       const fimSemana = new Date(hoje); fimSemana.setDate(hoje.getDate() + 7);
       const encomendasSemanaRes = await api.get('/api/encomendas', { params: { dataEntregaDe: hojeStr, dataEntregaAte: fimSemana.toISOString().slice(0,10) } });
+      
       setDashboard({
         encomendasHoje: encomendasHojeRes.data.length,
         faturamentoDia,

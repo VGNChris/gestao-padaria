@@ -5,21 +5,47 @@ const prisma = new PrismaClient();
 async function listarEncomendas(req, res) {
   const { statusProducao, statusPagamento, dataEntrega, dataEntregaDe, dataEntregaAte } = req.query;
   const where = {};
+  
   if (statusProducao) where.statusProducao = statusProducao;
   if (statusPagamento) where.statusPagamento = statusPagamento;
+  
   if (dataEntrega) {
-    where.dataEntrega = new Date(dataEntrega);
+    // Converter para data e criar range para o dia inteiro
+    const dataInicio = new Date(dataEntrega);
+    dataInicio.setHours(0, 0, 0, 0);
+    const dataFim = new Date(dataEntrega);
+    dataFim.setHours(23, 59, 59, 999);
+    
+    where.dataEntrega = {
+      gte: dataInicio,
+      lte: dataFim
+    };
   }
+  
   if (dataEntregaDe || dataEntregaAte) {
     where.dataEntrega = {};
-    if (dataEntregaDe) where.dataEntrega.gte = new Date(dataEntregaDe);
-    if (dataEntregaAte) where.dataEntrega.lte = new Date(dataEntregaAte);
+    if (dataEntregaDe) {
+      const dataInicio = new Date(dataEntregaDe);
+      dataInicio.setHours(0, 0, 0, 0);
+      where.dataEntrega.gte = dataInicio;
+    }
+    if (dataEntregaAte) {
+      const dataFim = new Date(dataEntregaAte);
+      dataFim.setHours(23, 59, 59, 999);
+      where.dataEntrega.lte = dataFim;
+    }
   }
+  
+  console.log('🔍 Filtros aplicados:', { statusProducao, statusPagamento, dataEntrega, dataEntregaDe, dataEntregaAte });
+  console.log('📅 Where clause:', JSON.stringify(where, null, 2));
+  
   const encomendas = await prisma.encomenda.findMany({
     where,
     include: { cliente: true, itensEncomenda: { include: { pao: true } } },
     orderBy: { dataEntrega: 'desc' },
   });
+  
+  console.log(`✅ ${encomendas.length} encomendas encontradas`);
   res.json(encomendas);
 }
 
